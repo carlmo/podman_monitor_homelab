@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Podman Container Health Monitor</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 2em; background: #f0f0f0; }
+        table { border-collapse: collapse; width: 50%; margin: auto; background: white; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+        th { background: #ddd; }
+        button { padding: 5px 10px; }
+    </style>
+</head>
+<body>
+    <h1 style="text-align:center;">Podman Container Status</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>Container</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody id="statusTable">
+        {% for name, port in containers.items() %}
+        <tr>
+            <td><a href="http://192.168.1.108:{{ port }}"> {{ name }}</a></td>
+            <td id="status-{{ name }}">Loading...</td>
+            <td><a href="/restart/{{ name }}"><button>Restart</button></a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        function updateStatus() {
+            fetch('/status')
+                .then(res => res.json())
+                .then(data => {
+                    for (const [name, status] of Object.entries(data)) {
+                        document.getElementById(`status-${name}`).textContent = status;
+                    }
+                });
+        }
+
+        // Initial update
+        updateStatus();
+
+        // Update every 5 seconds
+        setInterval(updateStatus, 5000);
+    </script>
+</body>
+</html>
+
